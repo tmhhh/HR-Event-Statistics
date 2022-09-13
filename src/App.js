@@ -1,5 +1,5 @@
 import { ClearOutlined } from "@ant-design/icons";
-import { Button, Table, Typography } from "antd";
+import { Button, Space, Table, Typography } from "antd";
 import "./App.css";
 const { Title, Text } = Typography;
 function App() {
@@ -59,7 +59,7 @@ function App() {
   ];
 
   return (
-    <div style={{ padding: 100 }}>
+    <Space direction="vertical" style={{ padding: 100, width: "100%" }}>
       <Title level={3}>HR Event</Title>
       <Table columns={columns} dataSource={data} pagination={false} />
       <Button
@@ -70,7 +70,7 @@ function App() {
       >
         Clear all
       </Button>
-    </div>
+    </Space>
   );
 }
 
