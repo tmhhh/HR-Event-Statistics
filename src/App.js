@@ -1,8 +1,11 @@
 import { ClearOutlined } from "@ant-design/icons";
-import { Button, Space, Table, Typography } from "antd";
+import { Button, Space, Spin, Table, Typography } from "antd";
+import axios from "axios";
+import { useEffect, useState } from "react";
 import "./App.css";
 const { Title, Text } = Typography;
 function App() {
+  const apiUrl = "http://hr-event-osd.herokuapp.com";
   const columns = [
     {
       title: "Id",
@@ -11,16 +14,16 @@ function App() {
       render: (text) => <Text>{text}</Text>,
     },
     {
-      title: "Question",
-      dataIndex: "question",
-      key: "question",
-      render: (text) => <a>{text}</a>,
+      title: "Pain Points",
+      dataIndex: "paintPoint",
+      key: "paintPoint",
+      render: (text) => <Text>{text}</Text>,
     },
     {
-      title: "Press count",
+      title: "Press Count",
       dataIndex: "pressCount",
       key: "pressCount",
-      render: (text) => <Text>{text}</Text>,
+      render: (text) => <Text strong>{text}</Text>,
     },
 
     {
@@ -28,48 +31,89 @@ function App() {
       key: "actions",
       dataIndex: "actions",
       render: (id) => (
-        <Button type="primary" icon={<ClearOutlined />} size={30}>
+        <Button
+          onClick={() => onReset(id)}
+          type="primary"
+          icon={<ClearOutlined />}
+          size={30}
+        >
           Clear
         </Button>
       ),
     },
   ];
-  const data = [
-    {
-      key: "1",
-      id: "1",
-      question: "John Brown",
-      pressCount: 32,
-      actions: "1",
-    },
-    {
-      key: "2",
-      id: "2",
-      question: "John Brown",
-      pressCount: 32,
-      actions: "2",
-    },
-    {
-      key: "3",
-      id: "3",
-      question: "John Brown",
-      pressCount: 32,
-      actions: "3",
-    },
-  ];
 
+  const [data, setData] = useState([]);
+  const [isLoading, setLoading] = useState(true);
+
+  /*
+   */
+
+  const onReset = async (question_id) => {
+    try {
+      await axios.delete(apiUrl + "/reset-count-by-id", {
+        params: {
+          question_id,
+        },
+      });
+
+      fetchCount();
+    } catch (error) {
+      console.log({ error });
+    }
+  };
+
+  const onResetAll = async () => {
+    try {
+      await axios.delete(apiUrl + "/reset-all");
+      fetchCount();
+    } catch (error) {
+      console.log({ error });
+    }
+  };
+
+  const fetchCount = async () => {
+    try {
+      const response = await Promise.all(
+        [...Array(6)].map((_, index) =>
+          axios.get(apiUrl + "/count", {
+            params: {
+              question_id: index + 1,
+            },
+          })
+        )
+      );
+      setData(response.map((item) => item.data));
+      setLoading(false);
+    } catch (error) {
+      console.log({ error });
+    }
+  };
+
+  useEffect(() => {
+    fetchCount();
+  }, []);
   return (
     <Space direction="vertical" style={{ padding: 100, width: "100%" }}>
       <Title level={3}>HR Event</Title>
-      <Table columns={columns} dataSource={data} pagination={false} />
-      <Button
-        style={{ marginLeft: "auto", marginTop: 10, display: "block" }}
-        type="primary"
-        icon={<ClearOutlined />}
-        size={30}
-      >
-        Clear all
-      </Button>
+      {isLoading ? (
+        <Spin
+          size="large"
+          style={{ position: "absolute", top: "50%", left: "50%" }}
+        />
+      ) : (
+        <>
+          <Table columns={columns} dataSource={data} pagination={false} />
+          <Button
+            style={{ marginLeft: "auto", marginTop: 10, display: "block" }}
+            type="primary"
+            icon={<ClearOutlined />}
+            onClick={onResetAll}
+          >
+            Clear all
+          </Button>
+        </>
+      )}
     </Space>
   );
 }
