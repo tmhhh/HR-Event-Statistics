@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import "./App.css";
 const { Title, Text } = Typography;
 function App() {
-  const apiUrl = "http://hr-event-osd.herokuapp.com";
+  const apiUrl = "https://hr-event-osd.herokuapp.com";
   const columns = [
     {
       title: "Id",
